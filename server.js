@@ -14,7 +14,7 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors({
-    origin: 'https://tam-website.netlify.app',
+    origin: '*',
     methods: ["GET", "POST", "PATCH", "DELETE"],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true,
