@@ -64,7 +64,7 @@ exports.update = async (req, res) => {
     const { id, name, detail, images, category_id, removeImages } = req.body;
     const connection = await db.getConnection();
     const removeImagesArray = removeImages ? removeImages.split(',').map(image => image.trim()) : [];
-    try {   
+    try {
         await connection.beginTransaction();
 
         // ตรวจสอบและจัดการค่าที่เป็น undefined
@@ -113,20 +113,30 @@ exports.update = async (req, res) => {
     }
 };
 
-exports.delete = async (id) => {
-    const connection = await db.getConnection();
+exports.delete = async (req, res) => {
+    let connection;
+    console.log(req.params.id)
     try {
+        connection = await db.getConnection();
         await connection.beginTransaction();
+        // Delete product images
+        await connection.execute('DELETE FROM product_images WHERE product_id = ?', [req.params.id]);
 
-        await connection.execute('DELETE FROM product_images WHERE product_id = ?', [id]);
-        const [result] = await connection.execute('DELETE FROM products WHERE id = ?', [id]);
+        // Delete product
+        const [result] = await connection.execute('DELETE FROM products WHERE id = ?', [req.params.id]);
 
         await connection.commit();
-        return result.affectedRows;
+        return res.send({})
     } catch (error) {
-        await connection.rollback();
-        throw error;
+        if (connection) await connection.rollback();
+        console.error('Error during deletion:', error);
+        return {
+            statusCode: 500,
+            message: 'Delete failed',
+            error: error.message
+        };
     } finally {
-        connection.release();
+        if (connection) connection.release();
     }
 };
+
