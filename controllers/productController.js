@@ -112,29 +112,30 @@ exports.update = async (req, res) => {
         connection.release();
     }
 };
-
 exports.delete = async (req, res) => {
+    const productId = req.params.id;
     let connection;
-    console.log(req.params.id)
+
     try {
         connection = await db.getConnection();
         await connection.beginTransaction();
+
         // Delete product images
-        await connection.execute('DELETE FROM product_images WHERE product_id = ?', [req.params.id]);
+        await connection.execute('DELETE FROM product_images WHERE product_id = ?', [productId]);
 
         // Delete product
-        const [result] = await connection.execute('DELETE FROM products WHERE id = ?', [req.params.id]);
+        const [result] = await connection.execute('DELETE FROM products WHERE id = ?', [productId]);
 
         await connection.commit();
-        return res.send({})
+        return res.status(200).json({ message: 'Product deleted successfully' });
     } catch (error) {
         if (connection) await connection.rollback();
-        console.error('Error during deletion:', error);
-        return {
-            statusCode: 500,
+        console.error('Error during deletion:', error.message);
+
+        return res.status(500).json({
             message: 'Delete failed',
             error: error.message
-        };
+        });
     } finally {
         if (connection) connection.release();
     }
