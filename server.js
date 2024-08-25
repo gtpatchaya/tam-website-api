@@ -4,6 +4,7 @@ const cors = require('cors');
 const categoryRoutes = require('./routes/categoryRoutes');
 const productRoutes = require('./routes/productRoutes');
 const authRoutes = require('./routes/authRoutes');
+const contactRoutes = require('./routes/contactRoutes');
 const path = require('path');
 
 dotenv.config();
@@ -26,6 +27,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/api/categories', categoryRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/auth', authRoutes);
+app.use('/api/contact', contactRoutes)
 
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
