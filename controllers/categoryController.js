@@ -4,15 +4,15 @@ const db = require('../config/database');
 exports.createCategory = async (req, res) => {
     const connection = await db.getConnection();
     try {
-        const { name, detail } = req.body;
+        const { name, detail, orderDisplay } = req.body;
 
         // เริ่มต้น transaction
         await connection.beginTransaction();
 
         // Insert category
         const [categoryResult] = await connection.execute(
-            'INSERT INTO categories (name, detail) VALUES (?, ?)',
-            [name, detail]
+            'INSERT INTO categories (name, detail, orderDisplay) VALUES (?, ?, ?)',
+            [name, detail, orderDisplay]
         );
         const categoryId = categoryResult.insertId;
 
@@ -52,6 +52,7 @@ exports.getAllCategories = async (req, res) => {
             FROM categories c
             LEFT JOIN category_images ci ON c.id = ci.category_id
             GROUP BY c.id
+            ORDER BY c.orderDisplay ASC
         `);
 
         const formattedCategories = categories.map(category => ({
@@ -82,7 +83,7 @@ exports.updateCategory = async (req, res) => {
     const connection = await db.getConnection();
     try {
         const { id } = req.params;
-        const { name, detail, removeImages } = req.body;
+        const { name, detail, removeImages, orderDisplay } = req.body;
         const removeImagesArray = removeImages ? removeImages.split(',').map(image => image.trim()) : []
         // เริ่มต้น transaction
         await connection.beginTransaction();
@@ -101,8 +102,8 @@ exports.updateCategory = async (req, res) => {
 
         // อัปเดต category
         await connection.execute(
-            'UPDATE categories SET name = ?, detail = ? WHERE id = ?',
-            [name, detail, id]
+            'UPDATE categories SET name = ?, detail = ?, orderDisplay = ? WHERE id = ?',
+            [name, detail, orderDisplay, id]
         );
 
         if (removeImagesArray && removeImagesArray.length > 0) {
